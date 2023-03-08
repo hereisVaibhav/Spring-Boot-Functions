@@ -1,0 +1,61 @@
+// For GET and LOAD
+/*
+To create a GET and LOAD API using Spring Boot, you can follow these steps:
+
+Define your data model: First, you need to define the data model for your application. This includes creating Java classes that represent the data you want to work with.
+
+Define your repository: Once you have your data model, you need to create a repository that can store and retrieve data. You can use Spring Data JPA to create a repository that works with a relational database.
+
+Define your controller: Next, you need to create a controller that exposes endpoints for your API. In this case, you want to create a GET endpoint and a LOAD endpoint. You can use Spring MVC to create your controller.
+
+Implement your GET endpoint: To implement your GET endpoint, you need to define a method in your controller that maps to the GET request. This method should retrieve data from your repository and return it in the response.
+
+Implement your LOAD endpoint: To implement your LOAD endpoint, you need to define a method in your controller that maps to the POST request. This method should receive data in the request body, validate it, and then store it in your repository.
+*/
+// Define your data model
+@Entity
+public class Person {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private int age;
+
+    // getters and setters
+}
+
+// Define your repository
+@Repository
+public interface PersonRepository extends JpaRepository<Person, Long> {
+}
+
+// Define your controller
+@RestController
+@RequestMapping("/people")
+public class PersonController {
+    @Autowired
+    private PersonRepository personRepository;
+
+    // Implement your GET endpoint
+    @GetMapping
+    public List<Person> getAllPeople() {
+        return personRepository.findAll();
+    }
+
+    // Implement your LOAD endpoint
+    @PostMapping
+    public ResponseEntity<?> addPerson(@RequestBody Person person) {
+        Person savedPerson = personRepository.save(person);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(savedPerson.getId())
+            .toUri();
+        return ResponseEntity.created(location).build();
+    }
+}
+
+// For DELETE
+ @DeleteMapping("/{id}")
+    public void deletePerson(@PathVariable Long id) {
+        personRepository.deleteById(id);
